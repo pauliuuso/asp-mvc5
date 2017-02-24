@@ -5,61 +5,79 @@ using System.Web;
 using System.Web.Mvc;
 using aspnet.Models;
 using aspnet.ViewModels;
+using System.Data.Entity;
 
 namespace aspnet.Controllers
 {
     public class MoviesController : Controller
     {
-        [Route("movies/movie/{id}")]
-        public ActionResult Movie(int id)
+        private ApplicationDbContext _context;
+        public MoviesController()
         {
-            System.Diagnostics.Debug.WriteLine(id);
-            List<Movie> movies = new List<Movie>();
-            movies.Add(new Movie() { Name = "Interstellar", Description = "Science fiction drama, one of the best modern movies" });
-            movies.Add(new Movie() { Name = "Sigur Ros Heima", Description = "Very warm filled with positive emotions movie" });
+            _context = new ApplicationDbContext();
+        }
+        public ActionResult Index()
+        {
+            var movies = _context.Movies.Include(m => m.Genre).ToList();
 
-            var customers = new List<Customer>
+            return View(movies);
+        }
+
+        public ActionResult AddMovie()
+        {
+            var genres = _context.Genres.ToList();
+            var viewModel = new NewMovieViewModel
             {
-                new Customer { Name = "Paulius" },
-                new Customer { Name = "Kristina" },
-                new Customer { Name = "Mindaugas" },
-                new Customer { Name = "Dovile" },
-                new Customer { Name = "Justinas" }
+                Genres = genres
             };
+            return View("EditOrAddMovie", viewModel);
+        }
 
-            var viewModel = new SingleMovieViewModel
+        [Route("movies/edit/{id}")]
+        public ActionResult EditMovie(int id)
+        {
+            var movie = _context.Movies.SingleOrDefault(m => m.Id == id);
+
+            if (movie == null)
             {
-                Movie = movies[id]
-            };
-
-            return View(viewModel);
-        }
-
-        [Route("movies/released/{year}/{month:regex(\\d{2}):range(1,12)}")]
-        public ActionResult ByReleaseDates(int year, int month)
-        {
-            return Content(year + "/" + month);
-        }
-
-        public ActionResult Edit(int id)
-        {
-            return Content("<h2>id = " + id + "</h2>");
-        }
-
-        public ActionResult Index(int? pageIndex, string sortBy)
-        {
-            if(!pageIndex.HasValue)
-            {
-                pageIndex = 1;
+                return HttpNotFound();
             }
 
-            if(String.IsNullOrWhiteSpace(sortBy))
+            var viewModel = new NewMovieViewModel
             {
-                sortBy = "Name";
+                Movie = movie,
+                Genres = _context.Genres.ToList()
+            };
+
+            return View("EditOrAddMovie", viewModel);
+
+        }
+
+        [HttpPost]
+        public ActionResult CreateMovie(Movie movie)
+        {
+            if (movie.Id == 0)
+            {
+                _context.Movies.Add(movie);
+            }
+            else
+            {
+                var movieInDb = _context.Movies.Single(c => c.Id == movie.Id);
+                movieInDb.Name = movie.Name;
+                //movieInDb.Description = movie.Description;
+                //movieInDb.ReleaseDate = movie.ReleaseDate;
+                //movieInDb.GenreId = movie.GenreId;
             }
 
-            return Content(String.Format("pageIndex = {0}; sortBy = {1}", pageIndex, sortBy));
+            _context.SaveChanges();
+            return RedirectToAction("Index", "Movies");
+        }
 
+        [Route("movies/details/{id}")]
+        public ActionResult SingleMovie(int id)
+        {
+            var movie = _context.Movies.Include(m => m.Genre).SingleOrDefault(mov => mov.Id == id);
+            return View(movie);
         }
 
     }

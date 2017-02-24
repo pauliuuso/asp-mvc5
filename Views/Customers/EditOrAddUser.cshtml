@@ -1,0 +1,31 @@
+﻿@model aspnet.ViewModels.NewCustomerViewModel
+@{
+    ViewBag.Title = "AddCustomer";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>Add Customer:</h2>
+
+@using (Html.BeginForm("CreateCustomer", "Customers"))
+{
+    <div class="form-group">
+        @Html.LabelFor(m => m.Customer.name)
+        @Html.TextBoxFor(m => m.Customer.name, new { @class = "form-control" })
+    </div>
+    <div class="form-group">
+        @Html.LabelFor(m => m.Customer.birthday)
+        @Html.TextBoxFor(m => m.Customer.birthday, "{0:d MMM yyyy}", new { @class = "form-control" })
+    </div>
+    <div class="form-group">
+        @Html.LabelFor(m => m.Customer.MembershipTypeId)
+        @Html.DropDownListFor(m => m.Customer.MembershipTypeId, new SelectList(Model.MembershipTypes, "Id", "Name"), "Select Membership Type", new { @class = "form-control" })
+    </div>
+    <div class="checkbox">
+        <label>
+            @Html.CheckBoxFor(m => m.Customer.isSubscribedToNewsLetter) Subscribe to newsletter!
+        </label>
+    </div>
+    @Html.HiddenFor(m => m.Customer.id);
+    <button type="submit" class="btn btn-primary">Submit</button>
+}
+

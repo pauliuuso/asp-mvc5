@@ -1,0 +1,12 @@
+﻿@model aspnet.Models.Movie
+@{
+    ViewBag.Title = "SingleMovie";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>@Model.Name</h2>
+<p>Genre: <strong>@Model.Genre.Name</strong></p>
+<p>Release date: <strong>@Model.ReleaseDate.ToShortDateString()</strong></p>
+
+
+

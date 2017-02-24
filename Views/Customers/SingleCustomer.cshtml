@@ -1,0 +1,20 @@
+﻿@model aspnet.Models.Customer
+@{
+    ViewBag.Title = "SingleCustomer";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@if (Model != null)
+{
+    <h2>@Model.name</h2>
+    <p>@Model.MembershipType.Name</p>
+    if(Model.birthday != null)
+    {
+        <p>Birthday: <strong>@Model.birthday.Value.ToShortDateString()</strong></p>
+    }
+}
+else
+{
+    <p>Customer not found!</p>
+}
+
